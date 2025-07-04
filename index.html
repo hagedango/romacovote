@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ロマ子様 親衛隊 投票管理</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #e4007f; /* Romako Pink */
+            --secondary-color: #ffd700; /* Gold */
+            --background-color: #1a1a1a;
+            --text-color: #e8e8e8; /* Brighter text */
+            --table-bg: #2c2c2c;
+            --table-border: #444;
+            --voted-bg: #50C878; /* Emerald Green */
+            --not-voted-bg: #4a1e1e;
+            --today-highlight: var(--primary-color);
+        }
+        body {
+            font-family: 'Noto Sans JP', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        h1, h2 {
+            font-family: 'Orbitron', sans-serif;
+            text-align: center;
+            color: var(--primary-color);
+            text-shadow: 0 0 5px var(--primary-color), 0 0 10px var(--secondary-color);
+        }
+        .container {
+            background: var(--table-bg);
+            padding: 25px;
+            border-radius: 8px;
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 0 15px rgba(228, 0, 127, 0.5);
+        }
+        .vote-link-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .vote-link {
+            display: inline-block;
+            padding: 12px 25px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            font-family: 'Orbitron', sans-serif;
+            text-transform: uppercase;
+            border: 2px solid var(--secondary-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .vote-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--secondary-color);
+        }
+        .registration, .status-board {
+            .status-board {
+            margin-bottom: 30px;
+            overflow-x: auto;
+        }
+        }
+        h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+        input[type="text"] {
+            width: calc(100% - 120px);
+            padding: 10px;
+            border: 1px solid var(--table-border);
+            background-color: #333;
+            color: var(--text-color);
+            border-radius: 4px;
+            margin-right: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            border: 1px solid var(--primary-color);
+            background-color: transparent;
+            color: var(--primary-color);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        button:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        th, td {
+            border: 1px solid var(--table-border);
+            padding: 10px 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #333;
+            color: var(--secondary-color);
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 3px black; /* Add shadow to header text */
+        }
+        td.name-cell {
+            text-align: left;
+            font-weight: bold;
+            width: 130px;
+            background-color: #333;
+            color: var(--text-color);
+        }
+        .vote-cell {
+            cursor: pointer;
+            width: 35px;
+            transition: background-color 0.2s;
+        }
+        .voted {
+            background-color: var(--voted-bg);
+            color: white;
+            font-weight: bold;
+        }
+        .not-voted {
+            background-color: var(--not-voted-bg);
+            color: #ff5555; /* Brighter red for the 'X' */
+            position: relative;
+        }
+        .not-voted:hover::after {
+            content: '未投票だ、恥を知れ';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #111;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            white-space: nowrap;
+            z-index: 10;
+        }
+        .today {
+            background-color: var(--today-highlight) !important;
+            color: white !important;
+        }
+        .loyalty-section {
+            padding: 20px;
+            background-color: rgba(255, 215, 0, 0.1);
+            border: 1px solid var(--secondary-color);
+            border-radius: 5px;
+        }
+        .loyalty-section ul {
+            list-style-type: "👑";
+            padding-left: 30px;
+        }
+        .loyalty-section li {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: var(--secondary-color);
+            margin-bottom: 8px;
+            text-shadow: 0 0 5px var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ロマ子様 親衛隊 投票管理</h1>
+        <div class="vote-link-container">
+            <a href="https://ec.v-tamp.com/events/vtamp_expo_2025_1/rank_bord/romaco" target="_blank" rel="noopener noreferrer" class="vote-link">
+                女王様に投票する
+            </a>
+        </div>
+        <p style="text-align: center; font-size: 0.9em; color: #bbb;">投票期間: 2025年7月2日 〜 7月21日</p>
+
+        <div class="registration">
+            <h2>貴様の名前を登録しろ</h2>
+            <input type="text" id="newName" placeholder="名前を刻め">
+            <button onclick="addMember()">登録</button>
+        </div>
+
+        <div class="status-board">
+            <h2>投票状況</h2>
+            <div id="voteTable"></div>
+        </div>
+
+        <div class="loyalty-section" id="loyaltySection">
+            <h2>忠誠の証 (皆勤の者)</h2>
+            <ul id="loyalSubjectsList">
+                <!-- 忠誠を誓った者がここに名を連ねる -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const startDate = new Date('2025-07-02T00:00:00');
+        const endDate = new Date('2025-07-21T00:00:00');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        let voteData = JSON.parse(localStorage.getItem('romacovoteData_v2')) || { members: [] };
+
+        function saveAndRender() {
+            localStorage.setItem('romacovoteData_v2', JSON.stringify(voteData));
+            renderTable();
+            updateLoyalSubjects();
+        }
+
+        function addMember() {
+            const nameInput = document.getElementById('newName');
+            const name = nameInput.value.trim();
+            if (name && !voteData.members.some(m => m.name === name)) {
+                voteData.members.push({ name: name, votes: {} });
+                nameInput.value = '';
+                saveAndRender();
+            } else if (!name) {
+                alert('名前を入力しろ、愚か者。');
+            } else {
+                alert('その名は既に存在する。他の名を考えろ。');
+            }
+        }
+
+        function toggleVote(name, dateStr) {
+            const member = voteData.members.find(m => m.name === name);
+            if (!member) return;
+
+            const voteDate = new Date(dateStr + 'T00:00:00');
+            if (voteDate > today) {
+                alert("未来への投票だと？　不敬であるぞ。");
+                return;
+            }
+
+            member.votes[dateStr] = !member.votes[dateStr];
+            saveAndRender();
+        }
+
+        function renderTable() {
+            const tableContainer = document.getElementById('voteTable');
+            let tableHtml = '<table><thead><tr><th>親衛隊</th>';
+
+            const dates = [];
+            for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+                const dateStr = d.toISOString().split('T')[0];
+                dates.push(dateStr);
+                const month = d.getMonth() + 1;
+                const day = d.getDate();
+                const isToday = d.getTime() === today.getTime();
+                tableHtml += `<th class="${isToday ? 'today' : ''}">${month}/${day}</th>`;
+            }
+            tableHtml += '</tr></thead><tbody>';
+
+            voteData.members.forEach(member => {
+                tableHtml += `<tr><td class="name-cell">${member.name}</td>`;
+                dates.forEach(dateStr => {
+                    const voted = member.votes[dateStr];
+                    const voteDate = new Date(dateStr + 'T00:00:00');
+                    const isPastOrToday = voteDate <= today;
+                    
+                    let cellClass = 'vote-cell';
+                    let cellContent = '';
+
+                    if (voted) {
+                        cellClass += ' voted';
+                        cellContent = '✔';
+                    } else if (isPastOrToday) {
+                        cellClass += ' not-voted';
+                        cellContent = '✖';
+                    }
+                    
+                    tableHtml += `<td class="${cellClass}" onclick="toggleVote('${member.name}', '${dateStr}')" title="${!voted && isPastOrToday ? '未投票だ、恥を知れ' : ''}">${cellContent}</td>`;
+                });
+                tableHtml += '</tr>';
+            });
+
+            tableHtml += '</tbody></table>';
+            tableContainer.innerHTML = tableHtml;
+        }
+        
+        function updateLoyalSubjects() {
+            const loyalSubjectsList = document.getElementById('loyalSubjectsList');
+            loyalSubjectsList.innerHTML = '';
+            
+            const datesToCheck = [];
+            for (let d = new Date(startDate); d <= today && d <= endDate; d.setDate(d.getDate() + 1)) {
+                datesToCheck.push(d.toISOString().split('T')[0]);
+            }
+
+            if (datesToCheck.length === 0) {
+                 const li = document.createElement('li');
+                li.style.fontWeight = "normal";
+                li.style.listStyleType = "none";
+                li.textContent = "まだ忠誠を示した者はいない。";
+                loyalSubjectsList.appendChild(li);
+                return;
+            }
+
+            const loyalMembers = voteData.members.filter(member => {
+                return datesToCheck.every(dateStr => member.votes[dateStr]);
+            });
+
+            if (loyalMembers.length > 0) {
+                loyalMembers.forEach(member => {
+                    const li = document.createElement('li');
+                    li.textContent = member.name;
+                    loyalSubjectsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.style.fontWeight = "normal";
+                li.style.listStyleType = "none";
+                li.textContent = "まだ忠誠を示した者はいない。";
+                loyalSubjectsList.appendChild(li);
+            }
+        }
+
+        window.onload = () => {
+            saveAndRender();
+        };
+    </script>
+
+</body>
+</html>
